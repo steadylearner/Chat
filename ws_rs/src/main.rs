@@ -1,14 +1,16 @@
 /// An example of a chat web application server
 extern crate ws;
-use ws::{listen, Handler, Message, Request, Response, Result, Sender};
+use ws::{listen, Handler, Message, Request, Response, Result, Sender, CloseCode};
 
-// This can be read from a file
+// This can be read from a file(index.html)
+// move this role for Rocket application or extract this part to .html file
+
 static INDEX_HTML: &'static [u8] = br#"
 <!doctype html>
 <html>
 
 <head>
-  <title>Socket.IO chat</title>
+  <title>Websocket Rust chat</title>
   <!-- <link rel="stylesheet" href="/main.css"> -->
   <style>
     * {
@@ -63,7 +65,7 @@ static INDEX_HTML: &'static [u8] = br#"
 <body>
   <ul id="messages"></ul>
   <form id="form">
-    <input type="text" id="msg">
+    <input type="text" id="msg" autocomplete="off" >
     <button>Send</button>
   </form>
 </body>
@@ -79,7 +81,12 @@ static INDEX_HTML: &'static [u8] = br#"
     input.value = "";
   });
 
+  socket.addEventListener('open', function (event) {
+    socket.send('Hello Server. Please send this message back to me!');
+  });
+
   socket.onmessage = function (event) {
+    console.log(`${event.data} from ${event.origin}`);
     const messages = document.getElementById("messages");
     const li = document.createElement("li");
     li.append(event.data)
@@ -104,23 +111,38 @@ impl Handler for Server {
         // Using multiple handlers is better (see router example)
         match req.resource() {
             // The default trait implementation
-            "/ws" => Response::from_request(req),
+            "/ws" => {
+              // used once for const socket = new WebSocket("ws://" + window.location.host + "/ws");
+              // https://blog.stanko.io/do-you-really-need-websockets-343aed40aa9b
+              // and no need for reconnet later
+              // println!("{:?} \n", req);
+              let resp = Response::from_request(req);
+              // println!("{:?} \n", &resp);
+              resp
+            },
 
             // Create a custom response
-            "/" => Ok(Response::new(200, "OK", INDEX_HTML.to_vec())),
+            "/" => Ok(Response::new(200, "OK", INDEX_HTML.to_vec())), // move this for Rocket application
 
-            _ => Ok(Response::new(404, "Not Found", b"404 - Not Found".to_vec())),
+            _ => Ok(Response::new(404, "Not Found", b"404 - Not Found".to_vec())), // move this for Rocket application
         }
     }
 
     // Handle messages recieved in the websocket (in this case, only on /ws)
     fn on_message(&mut self, msg: Message) -> Result<()> {
+        println!("The message from the client is {:?}", &msg);
         // Broadcast to all connections
         self.out.broadcast(msg)
+    }
+
+    fn on_close(&mut self, code: CloseCode, reason: &str) {
+       println!("Socket Closed. Code Type was : {:?}. Reason was: {:?}.", code, reason);
     }
 }
 
 fn main() {
     // Listen on an address and call the closure for each connection
-    listen("127.0.0.1:8000", |out| Server { out }).unwrap()
+    println!("Web Socket Server is ready at ws://127.0.0.1:8000/ws");
+    println!("Server is ready at http://127.0.0.1:8000/");
+    listen("127.0.0.1:8000", |out| Server { out }).unwrap();
 }
