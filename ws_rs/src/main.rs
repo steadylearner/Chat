@@ -1,9 +1,16 @@
 /// An example of a chat web application server
 extern crate ws;
-use ws::{listen, Handler, Message, Request, Response, Result, Sender, CloseCode};
+use ws::{
+  listen, CloseCode, Error, Handler, Handshake, Message, Request, Response, Result, Sender,
+};
+
+use std::cell::Cell;
+use std::rc::Rc;
 
 // This can be read from a file(index.html)
 // move this role for Rocket application or extract this part to .html file
+
+// https://ws-rs.org/guide integrate it here, write code for connection numbers
 
 static INDEX_HTML: &'static [u8] = br#"
 <!doctype html>
@@ -93,6 +100,11 @@ static INDEX_HTML: &'static [u8] = br#"
     messages.append(li);
   };
 
+  // verify it work
+  socket.onclose = function(event) {
+    console.log("WebSocket is closed now.");
+  };
+
 </script>
 
 </html>
@@ -102,47 +114,89 @@ static INDEX_HTML: &'static [u8] = br#"
 
 // Server web application handler
 struct Server {
-    out: Sender,
+  out: Sender,
+  count: Rc<Cell<u32>>,
 }
 
 impl Handler for Server {
-    //
-    fn on_request(&mut self, req: &Request) -> Result<(Response)> {
-        // Using multiple handlers is better (see router example)
-        match req.resource() {
-            // The default trait implementation
-            "/ws" => {
-              // used once for const socket = new WebSocket("ws://" + window.location.host + "/ws");
-              // https://blog.stanko.io/do-you-really-need-websockets-343aed40aa9b
-              // and no need for reconnet later
-              // println!("{:?} \n", req);
-              let resp = Response::from_request(req);
-              // println!("{:?} \n", &resp);
-              resp
-            },
+  //
+  fn on_request(&mut self, req: &Request) -> Result<(Response)> {
+    // Using multiple handlers is better (see router example)
+    match req.resource() {
+      // The default trait implementation
+      "/ws" => {
+        // used once for const socket = new WebSocket("ws://" + window.location.host + "/ws");
+        // https://blog.stanko.io/do-you-really-need-websockets-343aed40aa9b
+        // and no need for reconnet later
+        // println!("{:?} \n", req);
+        let resp = Response::from_request(req);
+        // println!("{:?} \n", &resp);
+        resp
+      }
 
-            // Create a custom response
-            "/" => Ok(Response::new(200, "OK", INDEX_HTML.to_vec())), // move this for Rocket application
+      // Create a custom response
+      "/" => Ok(Response::new(200, "OK", INDEX_HTML.to_vec())), // move this for Rocket application
 
-            _ => Ok(Response::new(404, "Not Found", b"404 - Not Found".to_vec())), // move this for Rocket application
-        }
+      _ => Ok(Response::new(404, "Not Found", b"404 - Not Found".to_vec())), // move this for Rocket application
     }
+  }
 
-    // Handle messages recieved in the websocket (in this case, only on /ws)
-    fn on_message(&mut self, msg: Message) -> Result<()> {
-        println!("The message from the client is {:?}", &msg);
-        // Broadcast to all connections
-        self.out.broadcast(msg)
-    }
+  fn on_open(&mut self, _: Handshake) -> Result<()> {
+    // We have a new connection, so we increment the connection counter
+    Ok(self.count.set(self.count.get() + 1))
+  }
 
-    fn on_close(&mut self, code: CloseCode, reason: &str) {
-       println!("Socket Closed. Code Type was : {:?}. Reason was: {:?}.", code, reason);
+  // Handle messages recieved in the websocket (in this case, only on /ws)
+  fn on_message(&mut self, msg: Message) -> Result<()> {
+    let number_of_connection = self.count.get();
+    println!("The number of live connections is {}\n", &number_of_connection);
+
+    println!("The message from the client is {:?}", &msg);
+
+    // Broadcast to all connections
+    self.out.broadcast(msg)
+  }
+
+
+
+  // fn on_close(&mut self, code: CloseCode, reason: &str) {
+  //    println!("Socket Closed. Code Type was : {:?}. Reason was: {:?}.", code, reason);
+  // }
+
+  // verify it work
+  fn on_close(&mut self, code: CloseCode, reason: &str) {
+    match code {
+      CloseCode::Normal => println!("The client is done with the connection."),
+      CloseCode::Away => println!("The client is leaving the site."),
+      CloseCode::Abnormal => {
+        println!("Closing handshake failed! Unable to obtain closing status from client.")
+      }
+      _ => println!("The client encountered an error: {}", reason),
     }
+    self.count.set(self.count.get() - 1)
+  }
+
+  fn on_error(&mut self, err: Error) {
+    println!("The server encountered an error: {:?}", err);
+  }
 }
 
 fn main() {
-    // Listen on an address and call the closure for each connection
-    println!("Web Socket Server is ready at ws://127.0.0.1:8000/ws");
-    println!("Server is ready at http://127.0.0.1:8000/");
-    listen("127.0.0.1:8000", |out| Server { out }).unwrap();
+  // Listen on an address and call the closure for each connection
+  println!("Web Socket Server is ready at ws://127.0.0.1:7777/ws");
+  println!("Server is ready at http://127.0.0.1:7777/");
+    // Cell gives us interior mutability so we can increment
+  // or decrement the count between handlers.
+  // Rc is a reference-counted box for sharing the count between handlers
+  // since each handler needs to own its contents.
+  let count = Rc::new(Cell::new(0));
+  listen("127.0.0.1:7777", |out| { Server { out: out, count: count.clone() } }).unwrap()
 }
+
+// to use WS with rocket you have to include it inside thread and use different port from Rocket
+
+// thread::spawn(|| {
+// println!("Web Socket Server is ready at ws://127.0.0.1:7777/ws");
+// println!("Server is ready at http://127.0.0.1:7777/");
+// listen("127.0.0.1:7777", |out| Server { out }).unwrap();
+// })
