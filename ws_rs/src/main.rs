@@ -7,7 +7,7 @@ use ws::{
 use std::cell::Cell;
 use std::rc::Rc;
 
-use std::process;
+// use std::process;
 
 // This can be read from a file(index.html)
 // move this role for Rocket application or extract this part to .html file
@@ -20,7 +20,7 @@ static INDEX_HTML: &'static [u8] = br#"
 
 <head>
   <title>Websocket Rust chat</title>
-  <!-- <link rel="stylesheet" href="/main.css"> -->
+  <!-- <link rel='stylesheet' href='/main.css'> -->
   <style>
     * {
       margin: 0;
@@ -72,9 +72,9 @@ static INDEX_HTML: &'static [u8] = br#"
 </head>
 
 <body>
-  <ul id="messages"></ul>
-  <form id="form">
-    <input type="text" id="msg" autocomplete="off" >
+  <ul id='messages'></ul>
+  <form id='form'>
+    <input type='text' id='msg' autocomplete='off' >
     <button>Send</button>
   </form>
 </body>
@@ -82,28 +82,36 @@ static INDEX_HTML: &'static [u8] = br#"
 <script>
   // at this point I need a framework.
 
-  const socket = new WebSocket("ws://" + window.location.host + "/ws");
+  const socket = new WebSocket('ws://' + window.location.host + '/ws');
 
-  const form = document.getElementById("form");
+  const form = document.getElementById('form');
   form.addEventListener('submit', function (event) {
     event.preventDefault();
-    const input = document.getElementById("msg");
-    if (input.value === "!stop") {
-      const messages = document.getElementById("messages");
-      const li = document.createElement("li");
-      li.append("You stopped the entire server");
+    const input = document.getElementById('msg');
+    if (input.value == '!exit') {
+      const messages = document.getElementById('messages');
+      const li = document.createElement('li');
+      li.append("You leave the server.")
       messages.append(li);
+      socket.close();
+      input.value = '';
     }
-    if (input.value === "!clear") {
-      const messages = document.getElementById("messages");
+    if (input.value === '!clear') {
+      const messages = document.getElementById('messages');
       while (messages.firstChild) {
         messages.removeChild(messages.firstChild);
       };
-      input.value = "";
+      input.value = '';
       return;
     }
+    if (input.value.slice(0, 2) === '!#') {
+      input.value = '';
+      return;
+    }
+
+
     socket.send(input.value);
-    input.value = "";
+    input.value = '';
   });
 
   socket.addEventListener('open', function (event) {
@@ -112,18 +120,18 @@ static INDEX_HTML: &'static [u8] = br#"
 
   socket.onmessage = function (event) {
     console.log(`${event.data} from ${event.origin}`);
-    const messages = document.getElementById("messages");
-    const li = document.createElement("li");
+    const messages = document.getElementById('messages');
+    const li = document.createElement('li');
     li.append(event.data)
     messages.append(li);
   };
 
   socket.onclose = function(event) {
-    const messages = document.getElementById("messages");
-    const li = document.createElement("li");
-    li.append("The chat server stopped. It won't work anymore");
+    const messages = document.getElementById('messages');
+    const li = document.createElement('li');
+    li.append(`You don't have connection to the server. It won't work.`);
     messages.append(li);
-    console.log("Chat stopped");
+    console.log('Chat stopped');
   };
 
 </script>
@@ -173,11 +181,6 @@ impl Handler for Server {
     let msg_from_user = msg.as_text().unwrap();
 
     println!("The message from the client is {:?}", msg_from_user);
-
-    if msg.as_text().unwrap() == "!stop" {
-      println!("User want to stop the entire process");
-      process::exit(0x0100)
-    }
 
     // Broadcast to all connections
     self.out.broadcast(msg)
