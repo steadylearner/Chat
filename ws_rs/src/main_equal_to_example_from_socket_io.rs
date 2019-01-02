@@ -5,8 +5,9 @@ use ws::{listen, Handler, Message, Request, Response, Result, Sender, CloseCode,
 // This can be read from a file(index.html)
 // move this role for Rocket application or extract this part to .html file
 
-// https://ws-rs.org/guide integrate it here, write code for connection numbers
-
+// should read more at https://developer.mozilla.org/en-US/docs/Web/API/WebSocket
+// and https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/send
+ 
 static INDEX_HTML: &'static [u8] = br#"
 <!doctype html>
 <html>

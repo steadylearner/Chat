@@ -7,6 +7,8 @@ use ws::{
 use std::cell::Cell;
 use std::rc::Rc;
 
+use std::process;
+
 // This can be read from a file(index.html)
 // move this role for Rocket application or extract this part to .html file
 
@@ -78,18 +80,34 @@ static INDEX_HTML: &'static [u8] = br#"
 </body>
 
 <script>
+  // at this point I need a framework.
+
   const socket = new WebSocket("ws://" + window.location.host + "/ws");
 
   const form = document.getElementById("form");
   form.addEventListener('submit', function (event) {
     event.preventDefault();
     const input = document.getElementById("msg");
+    if (input.value === "!stop") {
+      const messages = document.getElementById("messages");
+      const li = document.createElement("li");
+      li.append("You stopped the entire server");
+      messages.append(li);
+    }
+    if (input.value === "!clear") {
+      const messages = document.getElementById("messages");
+      while (messages.firstChild) {
+        messages.removeChild(messages.firstChild);
+      };
+      input.value = "";
+      return;
+    }
     socket.send(input.value);
     input.value = "";
   });
 
   socket.addEventListener('open', function (event) {
-    socket.send('Hello Server. Please send this message back to me!');
+    socket.send('Someone entered the chat.');
   });
 
   socket.onmessage = function (event) {
@@ -100,17 +118,18 @@ static INDEX_HTML: &'static [u8] = br#"
     messages.append(li);
   };
 
-  // verify it work
   socket.onclose = function(event) {
-    console.log("WebSocket is closed now.");
+    const messages = document.getElementById("messages");
+    const li = document.createElement("li");
+    li.append("The chat server stopped. It won't work anymore");
+    messages.append(li);
+    console.log("Chat stopped");
   };
 
 </script>
 
 </html>
     "#;
-
-// <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
 
 // Server web application handler
 struct Server {
@@ -151,7 +170,14 @@ impl Handler for Server {
     let number_of_connection = self.count.get();
     println!("The number of live connections is {}\n", &number_of_connection);
 
-    println!("The message from the client is {:?}", &msg);
+    let msg_from_user = msg.as_text().unwrap();
+
+    println!("The message from the client is {:?}", msg_from_user);
+
+    if msg.as_text().unwrap() == "!stop" {
+      println!("User want to stop the entire process");
+      process::exit(0x0100)
+    }
 
     // Broadcast to all connections
     self.out.broadcast(msg)
