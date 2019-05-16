@@ -41,15 +41,9 @@
 
 <!-- / -->
 
-In this post, we will learn how to build simple chat app in your local machine with **Rust** and simple JavaScript.
+# How to start Rust Chat App
 
-If you already have expereinece in Rust, you can just clone the [Steadylearner Chat] GitHub repository.
-
-Then, `$yarn` in /static/chat folder to download NPM packages and `$cargo run` for **Rust** crates in **ws_rs_with_rocket** folder.
-
-It will show you the chat app with **Rust** Backend at http://localhost:8000/chat.
-
-<br />
+You can find post for this at [Steadylearner Post for it](https://www.steadylearner.com/blog/read/How-to-start-Rust-Chat-App)
 
 <h2 class="red-white">[Prerequisite]</h2>
 
