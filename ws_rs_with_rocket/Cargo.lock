@@ -86,7 +86,7 @@ version = "0.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
-name = "chat_app_with_rust"
+name = "chat_app_with_rust_by_steadylearner"
 version = "0.1.0"
 dependencies = [
  "rocket 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
