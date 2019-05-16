@@ -43,7 +43,7 @@
 
 # How to start Rust Chat App
 
-You can find post for this at [Steadylearner Post for it](https://www.steadylearner.com/blog/read/How-to-start-Rust-Chat-App).
+You can also find post for this at [Steadylearner Post for this](https://www.steadylearner.com/blog/read/How-to-start-Rust-Chat-App).
 
 <h2 class="red-white">[Prerequisite]</h2>
 
