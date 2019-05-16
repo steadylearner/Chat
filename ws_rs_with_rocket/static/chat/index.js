@@ -135,7 +135,7 @@ socket.onmessage = function (event) {
 
     open = true;
 
-    p.textContent = `Your id is ${userId} and "You" will used in this page instead`;
+    p.textContent = `Your id is ${userId} and "You" will be used in this page instead`;
     p.className = "blue";
     li.append(p)
     messages.append(li);
