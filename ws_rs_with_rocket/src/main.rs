@@ -1,7 +1,7 @@
 #![feature(
     proc_macro_hygiene,
     decl_macro,
-    register_attr,
+    register_attr, // Rust replaced the previous feature with this
     rustc_private,
     type_ascription
 )]
