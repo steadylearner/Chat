@@ -21,7 +21,7 @@ struct Server {
 }
 
 impl Handler for Server {
-    fn on_request(&mut self, req: &Request) -> Result<(Response)> {
+    fn on_request(&mut self, req: &Request) -> Result<Response> {
         match req.resource() {
             "/ws" => {
                 // used once for const socket = new WebSocket("ws://" + window.location.host + "/ws");

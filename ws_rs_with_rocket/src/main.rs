@@ -1,7 +1,7 @@
 #![feature(
     proc_macro_hygiene,
     decl_macro,
-    custom_attribute,
+    register_attr,
     rustc_private,
     type_ascription
 )]
