@@ -3,7 +3,7 @@
    title: "How to start Rust Chat App",
    subtitle: "Build your local chat application with it.",
    image: "post/chat/rust_chat_title.png",
-   image_decription: "Rust Chat App by Steadylearner",
+   image_description: "Rust Chat App by Steadylearner",
    tags: "Rust chat app code",
    theme: "rust",
  }
@@ -62,17 +62,17 @@ You will use **Rust** mainly to build socket server to handle messages. So you n
 
 You also need to understand what is [Websocket API] to understand what you need to connect, send, receive and close the websocket for your chat app.
 
-(You may also visit [socket-io] JavaScript framework if you are more familar with JavaScript to understand the topic better.)
+(You may also visit [socket-io] JavaScript framework if you are more familiar with JavaScript to understand the topic better.)
 
-We will use ws-rs Rust crate for this post. So I want you to visit [its website][ws-rs] and read its API and documenation first.
+We will use ws-rs Rust crate for this post. So I want you to visit [its website][ws-rs] and read its API and documentation first.
 
 The chat app we will build here is just the improved version of [ws-rs-html-example]. Therefore, I want you to visit it and read its source code.
 
 I also prepared the examples to compare [ws-rs] to [socket-io] at [socket-io-and-ws-rs-comparision] GitHub page. You may refer to it if you are already knew  API of [socket-io].
 
-Whenever you have doubt about **Rust**, please visit [Rust Documentation] page and seach on your own. It will be better for you to read [Concurrency in Rust] and search other articles if you want to understand why Rust is fast.
+Whenever you have doubt about **Rust**, please visit [Rust Documentation] page and search on your own. It will be better for you to read [Concurrency in Rust] and search other articles if you want to understand why Rust is fast.
 
-(If you were completely new at Rust, but familar with JavaScript, you may read [TypeScript](https://www.typescriptlang.org/docs/index.html) documentation first because the purpose of both langauges is to have strong type system. It will help you to learn **Rust** if you haven't any experience in Rust.)
+(If you were completely new at Rust, but familiar with JavaScript, you may read [TypeScript](https://www.typescriptlang.org/docs/index.html) documentation first because the purpose of both languages is to have strong type system. It will help you to learn **Rust** if you haven't any experience in Rust.)
 
 <br />
 
@@ -90,7 +90,7 @@ Whenever you have doubt about **Rust**, please visit [Rust Documentation] page a
 
 ## 1. Setup Rocket to serve files
 
-(You can skip this part if you already downloaded [GitHub Respoitory][Steadylearner Chat] and understand how to structure Rust application.)
+(You can skip this part if you already downloaded [GitHub Repository][Steadylearner Chat] and understand how to structure Rust application.)
 
 If you have tested code at [ws-rs-html-example] before you read on, you should have found that a single Rust(.rs) file does everything to render html, serve file, and exchange messages.
 
@@ -115,7 +115,7 @@ Nothing complicated for our Cargo.toml, What we need is to notify **Rust** that 
 
 Then, [ws-rs] crate to work as socket server to handle chat messages.
 
-(If you are not familar with [.toml files](https://doc.rust-lang.org/cargo/reference/manifest.html), you may think it is similar to **package.json** in JavaScript)
+(If you are not familiar with [.toml files](https://doc.rust-lang.org/cargo/reference/manifest.html), you may think it is similar to **package.json** in JavaScript)
 
 Then we will build **main.rs** file first to be starting point for our Rust app.(Please, refer to the repository I gave before whenever you have doubts.)
 
@@ -229,7 +229,7 @@ and it is to serve **HTML** files for chat app.
 
 For example, https://www.yourwebsite.com/chat
 
-The file will help users to connect socket and have their separtate data with JavaScript and brwoser API later. We will learn how to do that in the last part of this post.
+The file will help users to connect socket and have their separate data with JavaScript and browser API later. We will learn how to do that in the last part of this post.
 
 You can refer to [Steadylearner Chat] and [Rocket] Documentation for more information.
 
@@ -357,11 +357,11 @@ The code snippet is a little bit long but the important parts will be
 
 1. [You need on_request part just once and you don't have to reconnect later](https://blog.stanko.io/do-you-really-need-websockets-343aed40aa9b).
 
-2. Use them to verify what you can do when the first socket connection between server and client happen and read [the documenation for them](https://ws-rs.org/api_docs/ws/struct.Request.html)
+2. Use them to verify what you can do when the first socket connection between server and client happen and read [the documentation for them](https://ws-rs.org/api_docs/ws/struct.Request.html)
 
 3. We need to count how many connections there are because it affects connection quality. You may use the `number_of_connection` variable with conditional statement.(We will write code for that in client side later. You may use your own code.)
 
-4. **This is the most important part.** Even though we use localhost first and not real users, there should be some ways to differenciate the users from one another. So We will use return value of `&handshake.peer_addr.unwrap()` for the purpose and also `number of connection` inside `fn on_open`. (If you open various windows for http://localhost:8000/chat later, You can see that it always return different values in your CLI.)
+4. **This is the most important part.** Even though we use localhost first and not real users, there should be some ways to differentiate the users from one another. So We will use return value of `&handshake.peer_addr.unwrap()` for the purpose and also `number of connection` inside `fn on_open`. (If you open various windows for http://localhost:8000/chat later, You can see that it always return different values in your CLI.)
 
 5. This is where you can do various things with messages from users. You can use database to save messages from users here. You may write experimental code, for example, to send **warning** received from other users to everyone connected to the server socket.(You may test it with **!warn** in socket client later.)
 
@@ -381,7 +381,7 @@ It is also important for you to understand that the most of the code used above 
 
 ![Rust Chat App](https://www.steadylearner.com/static/images/post/chat/rust_chat.png)
 
-We briefly learnt the Rust serverside code to build our chat app. It is time to build Frotnend part to help users.
+We briefly learnt the Rust server-side code to build our chat app. It is time to build Frontend part to help users.
 
 If you see the [index.html](https://github.com/steadylearner/Chat/blob/master/ws_rs_with_rocket/static/chat/index.html) file, The important part will be
 
@@ -691,7 +691,7 @@ The code snippet is a little bit long and I will explain only important parts he
 
 6. We didn't write code what to do when there are more users than allowed before at Rust server side. So we make client to leave the connection with JavaScript here.
 
-7. Use this part to allow users to type emojis easily. Please, read the doucmenation for them.([node-emoji], [has-emoji])
+7. Use this part to allow users to type emojis easily. Please, read the documentation for them.([node-emoji], [has-emoji])
 
 8. When socket closes, we notify users that the socket connection is closed and save messages from the user, other users and server to the localStorage.(You can use your database API instead.)
 
@@ -707,12 +707,12 @@ I hope the post was helpful to start your own chat app with Rust. It may not be 
 
 It was also my first trial to write chat app. So please contribute to Steadylearner Chat repository or Steadylearner Post for this blog post if you find something to improve.
 
-If you want to know someone who wants to improve his coding skill in Rust, JavaScript and Python everyeday, please contact me with [LinkedIn] and [Twitter]
+If you want to know someone who wants to improve his coding skill in Rust, JavaScript and Python everyday, please contact me with [LinkedIn] and [Twitter]
 
-(I would be grateful also if someone give me a chance to know who can help me to imporve Rust code skill for it is difficult to find one here.)
+(I would be grateful also if someone give me a chance to know who can help me to improve Rust code skill for it is difficult to find one here.)
 
 I am planning to convert Frontend code(HTML and JavaScript) used here to Rust with one of its web frameworks later and may write post for that also.
 
 We might learn how to write Rust code for Frontend and Backend code later with this example.
 
-**Thanks and please share this post with others**
+**Thanks and please share this post with others.**
